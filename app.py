@@ -34,7 +34,12 @@ def fetch_live_candles(ticker: str):
             return None
         if isinstance(df.columns, __import__('pandas').MultiIndex):
             df.columns = [c[0] for c in df.columns]
-        df.index = __import__('pandas').to_datetime(df.index).tz_localize(None)
+        idx = __import__('pandas').to_datetime(df.index)
+        # Convert UTC → IST (Asia/Kolkata) then strip tz for clean display
+        if idx.tz is None:
+            idx = idx.tz_localize('UTC')
+        idx = idx.tz_convert('Asia/Kolkata').tz_localize(None)
+        df.index = idx
         return df.sort_index()
     except Exception:
         return None
